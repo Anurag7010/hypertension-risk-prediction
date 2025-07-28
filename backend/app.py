@@ -1,13 +1,14 @@
 from flask import Flask, request, jsonify
 import joblib
 import numpy as np
-from flask_cors import CORS
 
 app = Flask(__name__)
-CORS(app)
 
-# Load your trained model
-model = joblib.load('hypertension_model.pkl')
+# Load your trained model, scaler, and imputer
+model_bundle = joblib.load('hypertension_model.pkl')
+model = model_bundle['model']
+scaler = model_bundle['scaler']
+imputer = model_bundle['imputer']
 
 # Define prediction route
 @app.route('/predict', methods=['POST'])
@@ -15,7 +16,7 @@ def predict():
     try:
         data = request.get_json()
 
-        # Extract features
+        # Extract features in the correct order
         features = [
             data['male'],
             data['age'],
@@ -31,8 +32,14 @@ def predict():
             data['glucose']
         ]
 
+        # Convert to 2D array for sklearn
+        features_array = np.array([features])
+        # Impute missing values (if any)
+        features_imputed = imputer.transform(features_array)
+        # Scale features
+        features_scaled = scaler.transform(features_imputed)
         # Predict
-        prediction = model.predict([features])[0]
+        prediction = model.predict(features_scaled)[0]
 
         result = 'High Risk' if prediction == 1 else 'Low Risk'
         return jsonify({'prediction': result})
