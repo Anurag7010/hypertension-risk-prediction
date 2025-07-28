@@ -1,5 +1,9 @@
 **Hypertension Risk Prediction**
+
+
 A full-stack machine learning application that predicts hypertension risk based on patient health data. The project consists of a Flask backend API with a trained ML model and a React frontend for user interaction.
+
+
 🚀 Features
 
 Machine Learning Model: Trained model with preprocessing pipeline (scaler and imputer)
